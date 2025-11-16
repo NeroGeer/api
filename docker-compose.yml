@@ -1,0 +1,29 @@
+version: "3.9"
+
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pr
+      POSTGRES_PASSWORD: pr
+      POSTGRES_DB: prdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+  backend:
+    build: .
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8080"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://pr:pr@db:5432/prdb
+
+
+volumes:
+  pgdata:
