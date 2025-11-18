@@ -1,81 +1,63 @@
-from datetime import datetime
 from pydantic import BaseModel
-from typing import List, Optional
-from models import PRStatus
+from typing import Optional
+from datetime import datetime
 
 
-class TeamMember(BaseModel):
-    user_id: str
-    username: str
-    is_active: bool
-
-
+# Base schemas
 class TeamBase(BaseModel):
-    team_name: str
-    members: List[TeamMember]
+    name: str
+    description: Optional[str] = None
 
 
-class TeamResponse(BaseModel):
-    team: TeamBase
+class TeamCreate(TeamBase):
+    pass
 
 
-class UserResponse(BaseModel):
-    user_id: str
+class Team(TeamBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True  # This replaces `orm_mode = True` in Pydantic v2
+
+
+# User schemas
+class UserBase(BaseModel):
     username: str
-    team_name: str
-    is_active: bool
+    email: str
 
 
-class PullRequestShort(BaseModel):
-    pull_request_id: str
-    pull_request_name: str
-    author_id: str
-    status: PRStatus
+class UserCreate(UserBase):
+    pass
 
 
-class PullRequestBase(BaseModel):
-    pull_request_id: str
-    pull_request_name: str
-    author_id: str
-    status: PRStatus
-    assigned_reviewers: List[str]
-    createdAt: Optional[datetime] = None
-    mergedAt: Optional[datetime] = None
+class User(UserBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
-class PullRequestCreate(BaseModel):
-    pull_request_id: str
-    pull_request_name: str
-    author_id: str
+# Pull Request schemas
+class PRBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    status: str
 
 
-class PullRequestMerge(BaseModel):
-    pull_request_id: str
+class PRCreate(PRBase):
+    team_id: int
+    author_id: int
 
 
-class PullRequestReassign(BaseModel):
-    pull_request_id: str
-    old_user_id: str
+class PR(PRBase):
+    id: int
+    team_id: int
+    author_id: int
+    created_at: datetime
+    updated_at: datetime
 
-
-class PullRequestResponse(BaseModel):
-    pr: PullRequestBase
-
-
-class PullRequestReassignResponse(BaseModel):
-    pr: PullRequestBase
-    replaced_by: str
-
-
-class UserReviewList(BaseModel):
-    user_id: str
-    pull_requests: List[PullRequestShort]
-
-
-class ErrorItem(BaseModel):
-    code: str
-    message: str
-
-
-class ErrorResponse(BaseModel):
-    error: ErrorItem
+    class Config:
+        from_attributes = True
